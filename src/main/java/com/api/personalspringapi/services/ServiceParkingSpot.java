@@ -2,6 +2,8 @@ package com.api.personalspringapi.services;
 
 import com.api.personalspringapi.models.ModelParkingSpot;
 import com.api.personalspringapi.respositories.RepositoryParkingSpot;
+import io.micrometer.observation.Observation;
+import io.micrometer.observation.ObservationRegistry;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,9 +16,11 @@ import java.util.UUID;
 @Service
 public class ServiceParkingSpot {
     final RepositoryParkingSpot repositoryParkingSpot;
+    final private ObservationRegistry observationRegistry;
 
-    public ServiceParkingSpot(RepositoryParkingSpot repositoryParkingSpot) {
+    public ServiceParkingSpot(RepositoryParkingSpot repositoryParkingSpot, ObservationRegistry observationRegistry) {
         this.repositoryParkingSpot = repositoryParkingSpot;
+        this.observationRegistry = observationRegistry;
     }
 
     @Transactional
@@ -36,8 +40,17 @@ public class ServiceParkingSpot {
         return repositoryParkingSpot.existsByApartmentAndBlock(apartment, block);
     }
 
-    public Page<ModelParkingSpot> findAll(Pageable pageable){
-        return repositoryParkingSpot.findAll(pageable);
+    public List<ModelParkingSpot> findAll(Pageable pageable) {
+        return Observation
+                .createNotStarted("findAll", observationRegistry)
+                .lowCardinalityKeyValue("valor", "88")
+                .lowCardinalityKeyValue("oi", "2")
+                .highCardinalityKeyValue("oiu", "osososo")
+                .observe(this::findAllNoObserver);
+    }
+
+    public List<ModelParkingSpot> findAllNoObserver(){
+        return repositoryParkingSpot.findAll();
     }
 
     public Optional<ModelParkingSpot> findById(UUID id){

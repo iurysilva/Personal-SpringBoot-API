@@ -3,6 +3,7 @@ package com.api.personalspringapi.controllers;
 import com.api.personalspringapi.dtos.DtoParkingSpot;
 import com.api.personalspringapi.models.ModelParkingSpot;
 import com.api.personalspringapi.services.ServiceParkingSpot;
+import io.micrometer.observation.Observation;
 import jakarta.validation.Valid;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
@@ -49,12 +50,13 @@ public class ControllerParkingSpot {
     }
 
     @GetMapping
-    public ResponseEntity<Page<ModelParkingSpot>> getAllParkingSpots(@PageableDefault(page =0, size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable){
+    public ResponseEntity<List<ModelParkingSpot>> getAllParkingSpots(@PageableDefault(page =0, size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable){
         return ResponseEntity.status(HttpStatus.OK).body(serviceParkingSpot.findAll(pageable));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Object> getOneParkingSpot(@PathVariable(value = "id") UUID id){
+
         Optional<ModelParkingSpot> optionalModelParkingSpot = serviceParkingSpot.findById(id);
         if (!optionalModelParkingSpot.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Parking Spot not found.");
